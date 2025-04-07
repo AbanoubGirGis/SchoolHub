@@ -1,5 +1,8 @@
 ﻿using App.Core.DTOs;
-using Microsoft.AspNetCore.Http;
+using App.Core.Entities;
+using App.Core.Infrastructure;
+using App.Core.Managers;
+using App.Core.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,48 +15,98 @@ namespace App.Api.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IConfiguration configuration;
-        public AuthController(IConfiguration configuration)
+        private readonly IConfiguration _configuration;
+        private readonly UserManager _userManager;
+        private readonly IEmailService _emailService;
+
+        public AuthController(
+            IConfiguration configuration,
+            UserManager userManager,
+            IEmailService emailService)
         {
-            this.configuration = configuration;
+            _configuration = configuration;
+            _userManager = userManager;
+            _emailService = emailService;
         }
-        [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginRequestDTO model)
+
+        [HttpPost("Login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequestDTO model)
         {
-            // Check user credentials (in a real application, you'd authenticate against a database)
-            if (model is { UserId: 111111 , Password: "Pass4" })
+            if (model == null || string.IsNullOrEmpty(model.Password))
             {
-                // generate token for user
-                var token = GenerateAccessToken(model.UserId.ToString());
-                // return access token for user's use
-                return Ok(new { AccessToken = new JwtSecurityTokenHandler().WriteToken(token) });
-
+                return BadRequest("Invalid login request");
             }
-            // unauthorized user
-            return Unauthorized("Invalid credentials");
+
+            var userResult = await _userManager.CheckUser(model.UserId, model.Password);
+            if (!userResult.IsSuccess)
+            {
+                return NotFound("Invalid Username or Password, Try again");
+            }
+
+            var updatedUserResult = await UpdateUserOtp(userResult.Data);
+            if (!updatedUserResult.IsSuccess)
+            {
+                return StatusCode(500, "Error processing authentication");
+            }
+
+            var isSent = await SendOtpEmail(updatedUserResult.Data.Email, (int)updatedUserResult.Data.Otp);
+            if (!isSent)
+            {
+                return StatusCode(500, "Failed to send OTP email");
+            }
+
+            var token = GenerateAccessToken(model.UserId.ToString());
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return Ok(new
+            {
+                accessToken = tokenString,
+                userId = userResult.Data.UserId,
+                message = "An email containing the OTP has been sent. Please check your inbox."
+            });
         }
 
-        // Generating token based on user information
         private JwtSecurityToken GenerateAccessToken(string userName)
         {
-            // Create user claims
             var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, userName),
-            // Add additional claims as needed (e.g., roles, etc.)
-        };
+            {
+                new Claim(ClaimTypes.Name, userName),
+            };
 
-            // Create a JWT
+            var secretKey = _configuration.GetValue<string>("JwtSettings:SecretKey")
+                ?? throw new InvalidOperationException("JWT secret key is not configured");
+
             var token = new JwtSecurityToken(
-                issuer: configuration.GetValue<string>("JwtSettings:Issuer"),
-                audience: configuration.GetValue<string>("JwtSettings:Audience"),
+                issuer: _configuration.GetValue<string>("JwtSettings:Issuer"),
+                audience: _configuration.GetValue<string>("JwtSettings:Audience"),
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(10), // Token expiration time
-                signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.GetValue<string>("JwtSettings:SecretKey")!)),
+                expires: DateTime.UtcNow.AddHours(1),
+                signingCredentials: new SigningCredentials(
+                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
                     SecurityAlgorithms.HmacSha256)
             );
 
             return token;
+        }
+
+        private async Task<bool> SendOtpEmail(string email, int otp)
+        {
+            return await _emailService.SendOtpEmail(email, otp.ToString());
+        }
+
+        private async Task<Result<User>> UpdateUserOtp(User user)
+        {
+            user.Otp = GenerateOtp();
+            var updateResult = await _userManager.UpdateUserOtp(user);
+
+            return updateResult.IsSuccess
+                ? Result<User>.Success(updateResult.Data)
+                : Result<User>.Failure("Error updating user OTP");
+        }
+
+        private static int GenerateOtp()
+        {
+            return new Random().Next(100000, 999999);
         }
     }
 }

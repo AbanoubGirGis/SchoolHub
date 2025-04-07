@@ -75,13 +75,12 @@ namespace App.Core.Managers
 
                 var currentTime = DateTime.Now;
                 var otpTime = existingUser.OtptimeOut;
-                var otpValidDuration = TimeSpan.FromMinutes(3);
+                var otpValidDuration = TimeSpan.FromMinutes(10);
 
                 if (existingUser.Otp == otp)
                 {
                     if (currentTime - otpTime <= otpValidDuration)
                     {
-                        // OTP is valid
                         return Result<User>.Success(existingUser);
                     }
                     else

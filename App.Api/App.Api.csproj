@@ -16,4 +16,8 @@
     <ProjectReference Include="..\App.Core\App.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Properties\PublishProfiles\" />
+  </ItemGroup>
+
 </Project>

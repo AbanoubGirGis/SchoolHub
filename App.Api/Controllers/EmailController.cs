@@ -14,42 +14,11 @@ namespace App.Api.Controllers
     [Authorize]
     public class EmailController : ControllerBase
     {
-        private readonly IEmailService iEmailService;
         private readonly UserManager userManager;
-
-        public EmailController(IEmailService iEmailService, UserManager userManager)
+        public EmailController( UserManager userManager)
         {
-            this.iEmailService = iEmailService;
             this.userManager = userManager;
         }
-
-        [HttpPost("Login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDTO request)
-        {
-            var userResult = await userManager.CheckUser(request.UserId, request.Password!);
-            if (!userResult.IsSuccess)
-            {
-                return NotFound(new { message = userResult.ErrorMessage });
-            }
-
-            var updatedUserResult = await UpdateUserOtp(userResult.Data);
-            if (!updatedUserResult.IsSuccess)
-            {
-                return NotFound(new { message = updatedUserResult.ErrorMessage });
-            }
-
-            if (!await SendOtpEmail(updatedUserResult.Data.Email, (int)updatedUserResult.Data.Otp))
-            {
-                return BadRequest(new { message = "Failed to send OTP email" });
-            }
-
-            return Ok(new
-            {
-                userId = updatedUserResult.Data.UserId,
-                message = "Email with OTP is sent"
-            });
-        }
-
         [HttpPost("CheckOTP")]
         public async Task<IActionResult> CheckOtp(int userId, int otp)
         {
@@ -58,35 +27,11 @@ namespace App.Api.Controllers
             {
                 return BadRequest(new { message = checkOtp.ErrorMessage });
             }
-
             return Ok(new
             {
                 userTypeId = checkOtp.Data.UserType,
                 userType = checkOtp.Data.UserTypeNavigation.Type,
             });
-        }
-
-        private async Task<Result<User>> UpdateUserOtp(User user)
-        {
-            user.Otp = GenerateOTP();
-            var updateResult = await userManager.UpdateUserOtp(user);
-
-            if (!updateResult.IsSuccess)
-            {
-                return Result<User>.Failure("Error updating user OTP");
-            }
-
-            return Result<User>.Success(updateResult.Data);
-        }
-
-        private async Task<bool> SendOtpEmail(string email, int otp)
-        {
-            return await iEmailService.SendOtpEmail(email, otp.ToString());
-        }
-
-        private int GenerateOTP()
-        {
-            return new Random().Next(100000, 999999);
         }
     }
 }
