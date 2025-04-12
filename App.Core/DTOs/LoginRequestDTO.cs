@@ -10,10 +10,10 @@ namespace App.Core.DTOs
     public class LoginRequestDTO
     {
         [Required(ErrorMessage = "User Id is required")]
-        public int UserId { get; set; }
+        public required string UserId { get; set; }
 
         [Required(ErrorMessage = "Password is required")]
         [DataType(DataType.Password)]
-        public string? Password { get; set; }
+        public required string Password { get; set; }
     }
 }

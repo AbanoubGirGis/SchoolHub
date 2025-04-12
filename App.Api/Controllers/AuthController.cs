@@ -15,46 +15,41 @@ namespace App.Api.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
-        private readonly UserManager _userManager;
-        private readonly IEmailService _emailService;
+        private readonly IConfiguration configuration;
+        private readonly UserManager userManager;
+        private readonly IEmailService emailService;
+        private readonly OtpManager otpManager;
 
         public AuthController(
             IConfiguration configuration,
             UserManager userManager,
-            IEmailService emailService)
+            IEmailService emailService,
+            OtpManager otpManager)
         {
-            _configuration = configuration;
-            _userManager = userManager;
-            _emailService = emailService;
+            this.configuration = configuration;
+            this.userManager = userManager;
+            this.emailService = emailService;
+            this.otpManager = otpManager;
         }
 
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDTO model)
         {
-            if (model == null || string.IsNullOrEmpty(model.Password))
-            {
-                return BadRequest("Invalid login request");
-            }
-
-            var userResult = await _userManager.CheckUser(model.UserId, model.Password);
+            // Check UserId & UserPassword
+            var userResult = await userManager.VerifyUserCredentials(model.UserId, model.Password);
             if (!userResult.IsSuccess)
             {
                 return NotFound("Invalid Username or Password, Try again");
             }
 
-            var updatedUserResult = await UpdateUserOtp(userResult.Data);
-            if (!updatedUserResult.IsSuccess)
+            // Send Otp
+            var isSent = await SendOtp(userResult.Data);
+            if (!isSent.IsSuccess)
             {
-                return StatusCode(500, "Error processing authentication");
+                return StatusCode(500, isSent.ErrorMessage);
             }
 
-            var isSent = await SendOtpEmail(updatedUserResult.Data.Email, (int)updatedUserResult.Data.Otp);
-            if (!isSent)
-            {
-                return StatusCode(500, "Failed to send OTP email");
-            }
-
+            // Generate Token
             var token = GenerateAccessToken(model.UserId.ToString());
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
@@ -73,12 +68,12 @@ namespace App.Api.Controllers
                 new Claim(ClaimTypes.Name, userName),
             };
 
-            var secretKey = _configuration.GetValue<string>("JwtSettings:SecretKey")
+            var secretKey = configuration.GetValue<string>("JwtSettings:SecretKey")
                 ?? throw new InvalidOperationException("JWT secret key is not configured");
 
             var token = new JwtSecurityToken(
-                issuer: _configuration.GetValue<string>("JwtSettings:Issuer"),
-                audience: _configuration.GetValue<string>("JwtSettings:Audience"),
+                issuer: configuration.GetValue<string>("JwtSettings:Issuer"),
+                audience: configuration.GetValue<string>("JwtSettings:Audience"),
                 claims: claims,
                 expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: new SigningCredentials(
@@ -89,24 +84,20 @@ namespace App.Api.Controllers
             return token;
         }
 
-        private async Task<bool> SendOtpEmail(string email, int otp)
+        private async Task<Result<bool>> SendOtp(User user)
         {
-            return await _emailService.SendOtpEmail(email, otp.ToString());
-        }
+            var otpResult = await otpManager.CreateOrUpdateUserOtp(user.Id);
+            if(!otpResult.IsSuccess)
+            {
+                return Result<bool>.Failure(otpResult.ErrorMessage);
+            }
 
-        private async Task<Result<User>> UpdateUserOtp(User user)
-        {
-            user.Otp = GenerateOtp();
-            var updateResult = await _userManager.UpdateUserOtp(user);
-
-            return updateResult.IsSuccess
-                ? Result<User>.Success(updateResult.Data)
-                : Result<User>.Failure("Error updating user OTP");
-        }
-
-        private static int GenerateOtp()
-        {
-            return new Random().Next(100000, 999999);
+            var isSent = await emailService.SendOtpEmail(user.Email, Convert.ToString(otpResult.Data.Code)!);
+            if (!isSent)
+            {
+                return Result<bool>.Failure("Failed to send OTP email");
+            }
+            return Result<bool>.Success(isSent);
         }
     }
 }

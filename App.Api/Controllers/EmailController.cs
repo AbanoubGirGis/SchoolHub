@@ -14,23 +14,27 @@ namespace App.Api.Controllers
     [Authorize]
     public class EmailController : ControllerBase
     {
-        private readonly UserManager userManager;
-        public EmailController( UserManager userManager)
+        private readonly OtpManager otpManager;
+
+        public EmailController(OtpManager otpManager)
         {
-            this.userManager = userManager;
+            this.otpManager = otpManager;
         }
         [HttpPost("CheckOTP")]
-        public async Task<IActionResult> CheckOtp(int userId, int otp)
+        public async Task<IActionResult> CheckOtp(string userId, int otp)
         {
-            var checkOtp = await userManager.CheckUserOTP(userId, otp);
+            var checkOtp = await otpManager.CheckUserOTP(userId, otp);
             if(!checkOtp.IsSuccess)
             {
                 return BadRequest(new { message = checkOtp.ErrorMessage });
             }
-            return Ok(new
+            return Ok(new UserDTO
             {
-                userTypeId = checkOtp.Data.UserType,
-                userType = checkOtp.Data.UserTypeNavigation.Type,
+                UserId = checkOtp.Data.User.UserId,
+                UserType = checkOtp.Data.User.UserType.TypeName,
+                FullName = checkOtp.Data.User.FullName,
+                Email = checkOtp.Data.User.Email,
+                Password = checkOtp.Data.User.Password,
             });
         }
     }

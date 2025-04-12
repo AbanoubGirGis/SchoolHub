@@ -15,11 +15,35 @@
    "T4TemplatePath": null,
    "Tables": [
       {
+         "Name": "[dbo].[Grade]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[OTP]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[ParentStudent]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Schedule]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Subject]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[User]",
          "ObjectType": 0
       },
       {
          "Name": "[dbo].[UserType]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Warning]",
          "ObjectType": 0
       }
    ],

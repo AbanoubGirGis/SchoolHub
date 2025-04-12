@@ -9,7 +9,9 @@ public partial class UserType
 {
     public int Id { get; set; }
 
-    public string Type { get; set; }
+    public string TypeName { get; set; }
+
+    public virtual ICollection<Schedule> Schedules { get; set; } = new List<Schedule>();
 
     public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

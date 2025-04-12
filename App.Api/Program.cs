@@ -22,6 +22,8 @@ namespace App.Api
 
 
             builder.Services.AddScoped<UserManager>();
+            builder.Services.AddScoped<OtpManager>();
+            builder.Services.AddScoped<ScheduleManager>();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -92,9 +94,9 @@ namespace App.Api
                 app.UseSwaggerUI();
             }
 
+            app.UseStaticFiles();
             app.UseAuthentication();
             app.UseAuthorization();
-
             app.MapControllers();
 
             app.Run();

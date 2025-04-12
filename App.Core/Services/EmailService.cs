@@ -50,8 +50,6 @@ namespace App.Core.Services
                 return false;
             }
         }
-
-
         private string GenerateEmailHtml(string otp)
         {
             return

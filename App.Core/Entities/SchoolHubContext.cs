@@ -13,42 +13,167 @@ public partial class SchoolHubContext : DbContext
     {
     }
 
+    public virtual DbSet<Grade> Grades { get; set; }
+
+    public virtual DbSet<Otp> Otps { get; set; }
+
+    public virtual DbSet<ParentStudent> ParentStudents { get; set; }
+
+    public virtual DbSet<Schedule> Schedules { get; set; }
+
+    public virtual DbSet<Subject> Subjects { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<UserType> UserTypes { get; set; }
 
+    public virtual DbSet<Warning> Warnings { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Grade>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Grades__54F87A5736DA967B");
+
+            entity.ToTable("Grade");
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.ExamType).HasMaxLength(50);
+            entity.Property(e => e.MaxScore).HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.Score).HasColumnType("decimal(5, 2)");
+
+            entity.HasOne(d => d.Student).WithMany(p => p.GradeStudents)
+                .HasForeignKey(d => d.StudentId)
+                .HasConstraintName("FK__Grades__StudentI__619B8048");
+
+            entity.HasOne(d => d.Subject).WithMany(p => p.Grades)
+                .HasForeignKey(d => d.SubjectId)
+                .HasConstraintName("FK__Grades__SubjectI__628FA481");
+
+            entity.HasOne(d => d.Teacher).WithMany(p => p.GradeTeachers)
+                .HasForeignKey(d => d.TeacherId)
+                .HasConstraintName("FK__Grades__TeacherI__60A75C0F");
+        });
+
+        modelBuilder.Entity<Otp>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__OTPs__3143C4A39EC5E2C8");
+
+            entity.ToTable("OTP");
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Otps)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK__OTPs__UserId__6B24EA82");
+        });
+
+        modelBuilder.Entity<ParentStudent>(entity =>
+        {
+            entity.HasKey(e => e.ParentId).HasName("PK__ParentSt__D339516F6898509A");
+
+            entity.ToTable("ParentStudent");
+
+            entity.HasIndex(e => e.StudentId, "UQ__ParentSt__32C52B9806726D39").IsUnique();
+
+            entity.Property(e => e.ParentId).ValueGeneratedNever();
+
+            entity.HasOne(d => d.Parent).WithOne(p => p.ParentStudentParent)
+                .HasForeignKey<ParentStudent>(d => d.ParentId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__ParentStu__Paren__6754599E");
+
+            entity.HasOne(d => d.Student).WithOne(p => p.ParentStudentStudent)
+                .HasForeignKey<ParentStudent>(d => d.StudentId)
+                .HasConstraintName("FK__ParentStu__Stude__68487DD7");
+        });
+
+        modelBuilder.Entity<Schedule>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Schedule__3214EC075AEABC23");
+
+            entity.ToTable("Schedule");
+
+            entity.Property(e => e.ImagePath).HasMaxLength(255);
+            entity.Property(e => e.Title).HasMaxLength(100);
+
+            entity.HasOne(d => d.UserType).WithMany(p => p.Schedules)
+                .HasForeignKey(d => d.UserTypeId)
+                .HasConstraintName("FK__Schedules__ForRo__5535A963");
+        });
+
+        modelBuilder.Entity<Subject>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Subjects__3214EC07B1BAC37C");
+
+            entity.ToTable("Subject");
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Name).HasMaxLength(100);
+
+            entity.HasOne(d => d.Teacher).WithMany(p => p.Subjects)
+                .HasForeignKey(d => d.TeacherId)
+                .HasConstraintName("FK__Subjects__Teache__5812160E");
+        });
+
         modelBuilder.Entity<User>(entity =>
         {
+            entity.HasKey(e => e.Id).HasName("PK__Users__3214EC07178340E5");
+
             entity.ToTable("User");
 
-            entity.Property(e => e.Email)
-                .IsRequired()
-                .HasMaxLength(50);
-            entity.Property(e => e.Otp)
-                .HasColumnType("decimal(6, 0)")
-                .HasColumnName("OTP");
-            entity.Property(e => e.OtptimeOut)
-                .HasColumnType("smalldatetime")
-                .HasColumnName("OTPTimeOut");
-            entity.Property(e => e.Password)
-                .IsRequired()
-                .HasMaxLength(50);
+            entity.HasIndex(e => e.UserId, "UQ__Users__1788CC4D57658BE7").IsUnique();
 
-            entity.HasOne(d => d.UserTypeNavigation).WithMany(p => p.Users)
-                .HasForeignKey(d => d.UserType)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_User_UserType");
+            entity.HasIndex(e => e.Email, "UQ__Users__A9D1053407BBD530").IsUnique();
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.FullName).HasMaxLength(100);
+            entity.Property(e => e.Password).HasMaxLength(255);
+            entity.Property(e => e.UserId)
+                .HasMaxLength(10)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.UserType).WithMany(p => p.Users)
+                .HasForeignKey(d => d.UserTypeId)
+                .HasConstraintName("FK__Users__UserTypeI__5165187F");
         });
 
         modelBuilder.Entity<UserType>(entity =>
         {
+            entity.HasKey(e => e.Id).HasName("PK__UserType__3214EC076311A402");
+
             entity.ToTable("UserType");
 
-            entity.Property(e => e.Type)
-                .IsRequired()
-                .HasMaxLength(50);
+            entity.Property(e => e.TypeName).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<Warning>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Warnings__21457158C3D0B3BB");
+
+            entity.ToTable("Warning");
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Reason).HasMaxLength(255);
+
+            entity.HasOne(d => d.Student).WithMany(p => p.Warnings)
+                .HasForeignKey(d => d.StudentId)
+                .HasConstraintName("FK__Warnings__Studen__5CD6CB2B");
+
+            entity.HasOne(d => d.Subject).WithMany(p => p.Warnings)
+                .HasForeignKey(d => d.SubjectId)
+                .HasConstraintName("FK__Warnings__Subjec__5BE2A6F2");
         });
 
         OnModelCreatingPartial(modelBuilder);

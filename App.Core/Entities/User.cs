@@ -9,17 +9,31 @@ public partial class User
 {
     public int Id { get; set; }
 
-    public int UserType { get; set; }
+    public string UserId { get; set; }
 
-    public int UserId { get; set; }
-
-    public string Password { get; set; }
+    public string FullName { get; set; }
 
     public string Email { get; set; }
 
-    public decimal Otp { get; set; }
+    public string Password { get; set; }
 
-    public DateTime OtptimeOut { get; set; }
+    public int? UserTypeId { get; set; }
 
-    public virtual UserType UserTypeNavigation { get; set; }
+    public DateTime? CreatedAt { get; set; }
+
+    public virtual ICollection<Grade> GradeStudents { get; set; } = new List<Grade>();
+
+    public virtual ICollection<Grade> GradeTeachers { get; set; } = new List<Grade>();
+
+    public virtual ICollection<Otp> Otps { get; set; } = new List<Otp>();
+
+    public virtual ParentStudent ParentStudentParent { get; set; }
+
+    public virtual ParentStudent ParentStudentStudent { get; set; }
+
+    public virtual ICollection<Subject> Subjects { get; set; } = new List<Subject>();
+
+    public virtual UserType UserType { get; set; }
+
+    public virtual ICollection<Warning> Warnings { get; set; } = new List<Warning>();
 }
