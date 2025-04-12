@@ -18,6 +18,7 @@ namespace App.Core.Managers
             this.schoolHubContext = schoolHubContext;
         }
 
+        // for Admin
         public async Task<Result<List<Schedule>>> GetSchedules()
         {
             try
@@ -60,7 +61,7 @@ namespace App.Core.Managers
             {
                 var schedule = new Schedule
                 {
-                    ImagePath = $"/uploads/{fileName}.webp",
+                    ImagePath = $"/uploads/{fileName}",
                     UserTypeId = userTypeId
                 };
                 await schoolHubContext.AddAsync(schedule);
@@ -72,7 +73,7 @@ namespace App.Core.Managers
                 return Result<Schedule>.Failure($"An error occurred when creating Schedule: {ex.Message}");
             }
         }
-        public async Task<Result<Schedule>> UpdateSchedule(int scheduleId, string fileName, int userTypeId)
+        public async Task<Result<Schedule>> UpdateSchedule(int scheduleId, string fileName)
         {
             try
             {
@@ -82,9 +83,9 @@ namespace App.Core.Managers
                     return Result<Schedule>.Failure("Schedule is not found");
                 }
 
-                schedule.UserTypeId = userTypeId;
+                schedule.UserTypeId = schedule.UserTypeId;
                 schedule.ImagePath = fileName;
-                schedule.ImagePath = $"/uploads/{fileName}.webp";
+                schedule.ImagePath = $"/uploads/{fileName}";
 
                 await schoolHubContext.SaveChangesAsync();
                 return Result<Schedule>.Success(schedule);
@@ -112,6 +113,26 @@ namespace App.Core.Managers
             catch (Exception ex)
             {
                 return Result<bool>.Failure($"An error occurred when deleting the Schedule: {ex.Message}");
+            }
+        }
+
+        //for Other users
+        public async Task<Result<Schedule>> GetUserTypeSchedule(int usertypeId)
+        {
+            try
+            {
+                var schedule = await schoolHubContext.Schedules
+                    .Include(s => s.UserType)
+                    .FirstOrDefaultAsync(x => x.UserTypeId == usertypeId);
+                if (schedule == null)
+                {
+                    return Result<Schedule>.Failure("Schedule not found");
+                }
+                return Result<Schedule>.Success(schedule);
+            }
+            catch (Exception ex)
+            {
+                return Result<Schedule>.Failure($"An error occurred when retrieving the Schedule: {ex.Message}");
             }
         }
     }

@@ -5,13 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace App.Core.DTOs
+namespace App.Core.DTOs.SchedulesDTOs
 {
-    public class ScheduleDTO
+    public class UpdateScheduleDTO
     {
         public int ScheduleId { get; set; }
-        public int UserTypeId { get; set; }
-        public string? FilePath { get; set; }
         public IFormFile? FormFile { get; set; }
     }
 }

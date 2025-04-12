@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace App.Api
 {
@@ -25,8 +26,12 @@ namespace App.Api
             builder.Services.AddScoped<OtpManager>();
             builder.Services.AddScoped<ScheduleManager>();
 
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                });
+
             builder.Services.AddEndpointsApiExplorer();
 
             builder.Services.AddSwaggerGen(options =>
