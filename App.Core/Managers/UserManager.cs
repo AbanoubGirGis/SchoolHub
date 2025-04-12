@@ -1,4 +1,5 @@
-﻿using App.Core.Entities;
+﻿using App.Core.DTOs.UsersDTOs;
+using App.Core.Entities;
 using App.Core.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -32,99 +33,109 @@ namespace App.Core.Managers
 
             return Result<User>.Success(user);
         }
-       
-        //public async Task<Result<User>> GetUserById(int userId)
-        //{
-        //    try
-        //    {
-        //        var user = await schoolHubContext.Users
-        //            .Include(u => u.UserTypeNavigation)
-        //            .FirstOrDefaultAsync(u => u.UserId == userId);
+        public async Task<Result<List<User>>> GetUsers()
+        {
+            try
+            {
+                var users = await schoolHubContext.Users
+                    .Include(u => u.UserType)
+                    .ToListAsync();
 
-        //        if (user == null)
-        //            return Result<User>.Failure("User not found");
+                return Result<List<User>>.Success(users);
+            }
+            catch (Exception ex)
+            {
+                return Result<List<User>>.Failure($"Error retrieving users: {ex.Message}");
+            }
+        }
+        public async Task<Result<User>> GetUser(string userId)
+        {
+            try
+            {
+                var user = await schoolHubContext.Users
+                    .Include(u => u.UserType)
+                    .FirstOrDefaultAsync(u => u.UserId == userId);
 
-        //        return Result<User>.Success(user);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Result<User>.Failure($"Error retrieving user: {ex.Message}");
-        //    }
-        //}
-        //public async Task<Result<List<User>>> GetAllUsers()
-        //{
-        //    try
-        //    {
-        //        var users = await schoolHubContext.Users
-        //            .Include(u => u.UserTypeNavigation)
-        //            .ToListAsync();
+                if (user == null)
+                    return Result<User>.Failure("User not found");
 
-        //        return Result<List<User>>.Success(users);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Result<List<User>>.Failure($"Error retrieving users: {ex.Message}");
-        //    }
-        //}
-        //public async Task<Result<User>> CreateUser(User user)
-        //{
-        //    try
-        //    {
-        //        await schoolHubContext.Users.AddAsync(user);
-        //        await schoolHubContext.SaveChangesAsync();
-        //        return Result<User>.Success(user);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Result<User>.Failure($"Error creating user: {ex.Message}");
-        //    }
-        //}
-        //public async Task<Result<User>> UpdateUser(User user)
-        //{
-        //    try
-        //    {
-        //        var existingUser = await schoolHubContext.Users
-        //            .FirstOrDefaultAsync(u => u.UserId == user.UserId || u.Id == user.Id);
+                return Result<User>.Success(user);
+            }
+            catch (Exception ex)
+            {
+                return Result<User>.Failure($"Error retrieving user: {ex.Message}");
+            }
+        }
+        public async Task<Result<User>> CreateUser(UserDTO userDTO)
+        {
+            try
+            {
+                var user = new User
+                {
+                    UserId = userDTO.UserId,
+                    FullName = userDTO.FullName,
+                    Email = userDTO.Email,
+                    Password = userDTO.Password,
+                    UserTypeId = userDTO.UserTypeId,
+                    CreatedAt = DateTime.Now,
+                };
+                await schoolHubContext.Users.AddAsync(user);
+                await schoolHubContext.SaveChangesAsync();
+                return Result<User>.Success(user);
+            }
+            catch (Exception ex)
+            {
+                return Result<User>.Failure($"Error creating user: {ex.Message}");
+            }
+        }
+        public async Task<Result<User>> UpdateUser(UserDTO userDTO)
+        {
+            try
+            {
+                var existingUser = await schoolHubContext.Users
+                    .FirstOrDefaultAsync(u => u.UserId == userDTO.UserId);
 
-        //        if (existingUser == null)
-        //        {
-        //            return Result<User>.Failure("User not found.");
-        //        }
+                if (existingUser == null)
+                {
+                    return Result<User>.Failure("User not found.");
+                }
 
-        //        existingUser.Password = user.Password;
-        //        existingUser.Email = user.Email;
-        //        existingUser.Otp = user.Otp;
-        //        existingUser.OtptimeOut = user.OtptimeOut;
-        //        existingUser.UserType = user.UserType;
 
-        //        schoolHubContext.Users.Update(existingUser);
-        //        await schoolHubContext.SaveChangesAsync();
+                existingUser.UserId = userDTO.UserId;
+                existingUser.FullName = userDTO.FullName;
+                existingUser.Email = userDTO.Email;
+                existingUser.Password = userDTO.Password;
+                existingUser.UserTypeId = userDTO.UserTypeId;
+                existingUser.CreatedAt = DateTime.Now;
+                
+                schoolHubContext.Users.Update(existingUser);
 
-        //        return Result<User>.Success(existingUser);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Result<User>.Failure($"An error occurred while updating: {ex.Message}");
-        //    }
-        //}
-        //public async Task<Result<bool>> DeleteUser(int userId)
-        //{
-        //    try
-        //    {
-        //        var user = await schoolHubContext.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+                await schoolHubContext.SaveChangesAsync();
+                return Result<User>.Success(existingUser);
+            }
+            catch (Exception ex)
+            {
+                return Result<User>.Failure($"Error Update user: {ex.Message}");
+            }
+        }
+        public async Task<Result<User>> DeleteUser(string userId)
+        {
+            try
+            {
+                var user = await schoolHubContext.Users.FirstOrDefaultAsync(u => u.UserId == userId);
 
-        //        if (user == null)
-        //            return Result<bool>.Failure("User not found");
+                if (user == null)
+                    return Result<User>.Failure("User not found");
 
-        //        schoolHubContext.Users.Remove(user);
-        //        await schoolHubContext.SaveChangesAsync();
+                schoolHubContext.Users.Remove(user);
+                await schoolHubContext.SaveChangesAsync();
 
-        //        return Result<bool>.Success(true);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Result<bool>.Failure($"Error deleting user: {ex.Message}");
-        //    }
-        //}
+                return Result<User>.Success(user);
+            }
+            catch (Exception ex)
+            {
+                return Result<User>.Failure($"Error deleting user: {ex.Message}");
+            }
+        }
     }
 }
