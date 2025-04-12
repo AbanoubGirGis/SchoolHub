@@ -120,7 +120,7 @@ namespace App.Api.Controllers
         }
 
         //for other Users
-        [HttpGet("UserTypeId/{userTypeId}")]
+        [HttpGet("userTypeId/{userTypeId}")]
         public async Task<IActionResult> GetScheduleByUserTypeId(int userTypeId)
         {
             var result = await scheduleManager.GetUserTypeSchedule(userTypeId);

@@ -99,7 +99,6 @@ namespace App.Core.Managers
             }
         }
 
-
         // Method to generate a random 6-digit OTP (One Time Password)
         private int GenerateOtp()
         {
