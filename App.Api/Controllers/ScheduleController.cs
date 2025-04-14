@@ -53,7 +53,7 @@ namespace App.Api.Controllers
         }
 
         [HttpPost()]
-        public async Task<IActionResult> CreateSchedule([FromForm] CreateScheduleDTO createScheduleDTO)
+        public async Task<IActionResult> CreateSchedule([FromBody] CreateScheduleDTO createScheduleDTO)
         {
             if (createScheduleDTO == null || createScheduleDTO.FormFile?.Length == 0)
                 return BadRequest("No file uploaded.");
@@ -81,7 +81,7 @@ namespace App.Api.Controllers
         }
 
         [HttpPut()]
-        public async Task<IActionResult> UpdateSchedule([FromForm] UpdateScheduleDTO UpdateScheduleDTO)
+        public async Task<IActionResult> UpdateSchedule([FromBody] UpdateScheduleDTO UpdateScheduleDTO)
         {
             if (UpdateScheduleDTO == null || UpdateScheduleDTO.FormFile?.Length == 0)
                 return BadRequest("No file uploaded.");

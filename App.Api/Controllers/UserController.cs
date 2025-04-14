@@ -51,7 +51,7 @@ namespace App.Api.Controllers
         }
 
         [HttpPost()]
-        public async Task<IActionResult> CreateUser([FromForm] UserDTO userDTO)
+        public async Task<IActionResult> CreateUser([FromBody] UserDTO userDTO)
         {
             var userResult = await userManager.CreateUser(userDTO);
             if (!userResult.IsSuccess) 
@@ -65,7 +65,7 @@ namespace App.Api.Controllers
         }
 
         [HttpPut()]
-        public async Task<IActionResult> UpdateUser([FromForm] UserDTO userDTO)
+        public async Task<IActionResult> UpdateUser([FromBody] UserDTO userDTO)
         {
             var userResult = await userManager.UpdateUser(userDTO);
             if (!userResult.IsSuccess)

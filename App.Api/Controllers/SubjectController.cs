@@ -52,7 +52,7 @@ namespace App.Api.Controllers
         }
 
         [HttpPost()]
-        public async Task<IActionResult> CreateSubject([FromForm] SubjectDTO subjectDTO)
+        public async Task<IActionResult> CreateSubject([FromBody] SubjectDTO subjectDTO)
         {
             var subjectResult = await subjectManager.CreateSubject(subjectDTO);
             if (!subjectResult.IsSuccess) 
@@ -66,7 +66,7 @@ namespace App.Api.Controllers
         }
 
         [HttpPut()]
-        public async Task<IActionResult> UpdateUser([FromForm] UpdateSubjectDTO updateSubjectDTO)
+        public async Task<IActionResult> UpdateUser([FromBody] UpdateSubjectDTO updateSubjectDTO)
         {
             var subjectResult = await subjectManager.UpdateSubject(updateSubjectDTO);
             if (!subjectResult.IsSuccess)
@@ -93,7 +93,7 @@ namespace App.Api.Controllers
             });
         }
 
-        [HttpGet("/userSubjects/{userId}")]
+        [HttpGet("userSubjects/{userId}")]
         public async Task<IActionResult> GetUserSubjects(string userId)
         {
             var subjectResult = await subjectManager.GetUserSubjects(userId);

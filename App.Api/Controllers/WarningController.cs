@@ -52,7 +52,7 @@ namespace App.Api.Controllers
         }
 
         [HttpPost()]
-        public async Task<IActionResult> CreateWarning([FromForm] WarningDTO warningDTO)
+        public async Task<IActionResult> CreateWarning([FromBody] WarningDTO warningDTO)
         {
             var warningResult = await warningManager.CreateWarning(warningDTO);
             if (!warningResult.IsSuccess) 
@@ -66,7 +66,7 @@ namespace App.Api.Controllers
         }
 
         [HttpPut()]
-        public async Task<IActionResult> UpdateUser([FromForm] UpdateWarningDTO updateWarningDTO)
+        public async Task<IActionResult> UpdateUser([FromBody] UpdateWarningDTO updateWarningDTO)
         {
             var warningResult = await warningManager.UpdateWarning(updateWarningDTO);
             if (!warningResult.IsSuccess)
@@ -93,7 +93,7 @@ namespace App.Api.Controllers
             });
         }
 
-        [HttpGet("/userWarning/{userId}")]
+        [HttpGet("userWarning/{userId}")]
         public async Task<IActionResult> GetUserWarning(string userId)
         {
             var warningResult = await warningManager.GetUserWarning(userId);

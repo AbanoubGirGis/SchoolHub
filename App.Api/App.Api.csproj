@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\" />
-    <Folder Include="Properties\PublishProfiles\" />
+    <Folder Include="Controllers\Properties\PublishProfiles\" />
   </ItemGroup>
 
 </Project>
