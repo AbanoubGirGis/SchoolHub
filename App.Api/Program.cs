@@ -27,6 +27,7 @@ namespace App.Api
             builder.Services.AddScoped<ScheduleManager>();
             builder.Services.AddScoped<WarningManager>();
             builder.Services.AddScoped<SubjectManager>();
+            builder.Services.AddScoped<GradeManager>();
 
             builder.Services.AddControllers()
                 .AddJsonOptions(options =>
