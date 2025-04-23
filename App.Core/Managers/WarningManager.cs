@@ -23,6 +23,7 @@ namespace App.Core.Managers
         {
             var warnings = await schoolHubContext.Warnings
                                 .Include(w => w.Student)
+                                .Include(w => w.Subject)
                                 .ToListAsync();
             return Result<List<Warning>>.Success(warnings);
         }
@@ -31,6 +32,7 @@ namespace App.Core.Managers
         {
             var warning = await schoolHubContext.Warnings
                                 .Include(w => w.Student)
+                                .Include(w => w.Subject)
                                 .FirstOrDefaultAsync(w => w.Id == Id);
             if (warning == null)
             {
@@ -69,7 +71,6 @@ namespace App.Core.Managers
 
                 var warning = new Warning
                 {
-
                     SubjectId = warningDTO.SubjectId,
                     StudentId = userWarning.Id,
                     Reason = warningDTO.Reason,

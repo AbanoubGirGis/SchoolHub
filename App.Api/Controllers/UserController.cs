@@ -88,8 +88,25 @@ namespace App.Api.Controllers
             }
             return Ok(new
             {
-                message = $" User ID {userResult.Data.UserId} has been successfully updated."
+                message = $" User ID {userResult.Data.UserId} has been successfully deleted."
             });
         }
+
+        [HttpGet("teachers")]
+        public async Task<IActionResult> GetTeacher()
+        {
+            var usersResult = await userManager.GetTeachers();
+            if (!usersResult.IsSuccess)
+            {
+                return StatusCode(500, usersResult.ErrorMessage);
+            }
+            return Ok(new UsersDTO
+            {
+                Users = usersResult.Data.ToList(),
+                Count = usersResult.Data.Count()
+            });
+        }
+
+
     }
 }

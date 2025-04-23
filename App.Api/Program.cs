@@ -94,7 +94,30 @@ namespace App.Api
 
             #endregion
 
+            builder.Services.AddCors(op =>
+            {
+                op.AddPolicy("Default", policy =>
+                {
+                    policy.WithOrigins("https://school-system-delta.vercel.app");
+                    policy.AllowAnyHeader().
+                           AllowAnyMethod().
+                           AllowAnyOrigin();
+                });
+            });
+
             var app = builder.Build();
+
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Method == HttpMethods.Options)
+                {
+                    context.Response.StatusCode = 200;
+                    await context.Response.CompleteAsync();
+                    return;
+                }
+
+                await next();
+            });
 
             if (app.Environment.IsDevelopment())
             {
@@ -102,11 +125,14 @@ namespace App.Api
                 app.UseSwaggerUI();
             }
 
+            app.UseHttpsRedirection();
+
             app.UseStaticFiles();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.MapControllers();
+            app.UseCors("Default");
 
+            app.MapControllers();
             app.Run();
         }
     }

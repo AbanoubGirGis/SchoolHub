@@ -137,5 +137,22 @@ namespace App.Core.Managers
                 return Result<User>.Failure($"Error deleting user: {ex.Message}");
             }
         }
+
+        public async Task<Result<List<User>>> GetTeachers()
+        {
+            try
+            {
+                var users = await schoolHubContext.Users.Where(x => x.UserTypeId == 3)
+                    .Include(u => u.UserType)
+                    .ToListAsync();
+
+                return Result<List<User>>.Success(users);
+            }
+            catch (Exception ex)
+            {
+                return Result<List<User>>.Failure($"Error retrieving users: {ex.Message}");
+            }
+        }
+
     }
 }
