@@ -19,11 +19,11 @@ namespace App.Core.Managers
             this.schoolHubContext = schoolHubContext;
         }
 
-        public async Task<Result<User>> VerifyUserCredentials(string id, string password)
+        public async Task<Result<User>> VerifyUserCredentials(string userId, string password)
         {
             var user = await schoolHubContext.Users
                 .Include(u => u.UserType)
-                .FirstOrDefaultAsync(u => u.UserId == id);
+                .FirstOrDefaultAsync(u => u.UserId == userId);
 
             if (user == null)
                 return Result<User>.Failure("User not found"); ;
@@ -107,7 +107,7 @@ namespace App.Core.Managers
                 existingUser.Password = userDTO.Password;
                 existingUser.UserTypeId = userDTO.UserTypeId;
                 existingUser.CreatedAt = DateTime.Now;
-                
+
                 schoolHubContext.Users.Update(existingUser);
 
                 await schoolHubContext.SaveChangesAsync();
@@ -154,5 +154,41 @@ namespace App.Core.Managers
             }
         }
 
+        public async Task<Result<User>> ForgetPassword(string userId)
+        {
+            try
+            {
+                var user = await schoolHubContext.Users
+                    .Include(u => u.UserType)
+                    .FirstOrDefaultAsync(u => u.UserId == userId);
+                if (user == null)
+                {
+                    return Result<User>.Failure("User is not Found");
+                }
+
+                user.Password = GeneratePassword();
+                schoolHubContext.Users.Update(user);
+                await schoolHubContext.SaveChangesAsync();
+
+                return Result<User>.Success(user);
+            }
+            catch (Exception ex)
+            {
+                return Result<User>.Failure($"Error Update user new password: {ex.Message}");
+            }
+        }
+        private string GeneratePassword(int length = 6)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var random = new Random();
+            var password = new StringBuilder();
+
+            for (int i = 0; i < length; i++)
+            {
+                password.Append(chars[random.Next(chars.Length)]);
+            }
+
+            return password.ToString();
+        }
     }
 }

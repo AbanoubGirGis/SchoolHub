@@ -17,6 +17,18 @@ namespace App.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            #region Cors
+            builder.Services.AddCors(op =>
+            {
+                op.AddPolicy("Default", policy =>
+                {
+                    policy.WithOrigins("https://school-hub-system.vercel.app")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+            });
+            #endregion
+
             #region Register Services
             builder.Services.AddDbContext<SchoolHubContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -94,30 +106,7 @@ namespace App.Api
 
             #endregion
 
-            builder.Services.AddCors(op =>
-            {
-                op.AddPolicy("Default", policy =>
-                {
-                    policy.WithOrigins("https://school-system-delta.vercel.app");
-                    policy.AllowAnyHeader().
-                           AllowAnyMethod().
-                           AllowAnyOrigin();
-                });
-            });
-
             var app = builder.Build();
-
-            app.Use(async (context, next) =>
-            {
-                if (context.Request.Method == HttpMethods.Options)
-                {
-                    context.Response.StatusCode = 200;
-                    await context.Response.CompleteAsync();
-                    return;
-                }
-
-                await next();
-            });
 
             if (app.Environment.IsDevelopment())
             {
@@ -126,13 +115,15 @@ namespace App.Api
             }
 
             app.UseHttpsRedirection();
-
             app.UseStaticFiles();
-            app.UseAuthentication();
-            app.UseAuthorization();
+
             app.UseCors("Default");
 
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             app.MapControllers();
+
             app.Run();
         }
     }

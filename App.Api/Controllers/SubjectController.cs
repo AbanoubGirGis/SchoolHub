@@ -66,7 +66,7 @@ namespace App.Api.Controllers
         }
 
         [HttpPut()]
-        public async Task<IActionResult> UpdateUser([FromBody] UpdateSubjectDTO updateSubjectDTO)
+        public async Task<IActionResult> UpdateSubject([FromBody] UpdateSubjectDTO updateSubjectDTO)
         {
             var subjectResult = await subjectManager.UpdateSubject(updateSubjectDTO);
             if (!subjectResult.IsSuccess)

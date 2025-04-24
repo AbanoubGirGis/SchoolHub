@@ -51,7 +51,7 @@ namespace App.Core.Managers
 
             var warning = await schoolHubContext.Warnings
                                 .Include(w => w.Student)
-                                .FirstOrDefaultAsync(w => w.Id == userWarning.Id);
+                                .FirstOrDefaultAsync(w => w.StudentId == userWarning.Id);
             if (warning == null)
             {
                 return Result<Warning>.Failure("Warning not found");
@@ -92,13 +92,14 @@ namespace App.Core.Managers
             try
             {
                 var warning = await schoolHubContext.Warnings.FirstOrDefaultAsync(w => w.Id == updateWarningDTO.WarningId);
-                if (warning == null)
+                var student = await schoolHubContext.Users.FirstOrDefaultAsync(u => u.UserId == updateWarningDTO.StudentId);
+                if (warning == null || student == null)
                 {
-                    return Result<Warning>.Failure("Warning not found");
+                    return Result<Warning>.Failure("Warning or Student not found");
                 }
 
                 warning.SubjectId = updateWarningDTO.SubjectId;
-                warning.StudentId = updateWarningDTO.SubjectId;
+                warning.StudentId = student.Id;
                 warning.Reason = updateWarningDTO.Reason;
                 warning.CreatedAt = DateTime.Now;
 

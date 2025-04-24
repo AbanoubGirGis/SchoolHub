@@ -66,7 +66,7 @@ namespace App.Api.Controllers
         }
 
         [HttpPut()]
-        public async Task<IActionResult> UpdateUser([FromBody] UpdateWarningDTO updateWarningDTO)
+        public async Task<IActionResult> UpdateWarning([FromBody] UpdateWarningDTO updateWarningDTO)
         {
             var warningResult = await warningManager.UpdateWarning(updateWarningDTO);
             if (!warningResult.IsSuccess)

@@ -18,10 +18,12 @@ namespace App.Api.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserManager userManager;
+        private readonly IEmailService emailService;
 
-        public UserController(UserManager userManager)
+        public UserController(UserManager userManager, IEmailService emailService)
         {
             this.userManager = userManager;
+            this.emailService = emailService;
         }
 
         [HttpGet]
@@ -93,7 +95,7 @@ namespace App.Api.Controllers
         }
 
         [HttpGet("teachers")]
-        public async Task<IActionResult> GetTeacher()
+        public async Task<IActionResult> GetTeachers()
         {
             var usersResult = await userManager.GetTeachers();
             if (!usersResult.IsSuccess)
@@ -107,6 +109,25 @@ namespace App.Api.Controllers
             });
         }
 
+        [HttpPost("{userId}")]
+        public async Task<IActionResult> ForgetPassword(string userId)
+        {
+            var userResult = await userManager.ForgetPassword(userId);
+            if (!userResult.IsSuccess)
+            {
+                return StatusCode(500, userResult.ErrorMessage);
+            }
 
+            var isSent = await emailService.SendNewPassword(userResult.Data.Email, userResult.Data.Password);
+            if (!isSent)
+            {
+                return StatusCode(500, "Failed to send New Password");
+            }
+
+            return Ok(new
+            {
+                message = "An email containing the New Password has been sent. Please check your inbox."
+            });
+        }
     }
 }
