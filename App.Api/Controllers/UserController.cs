@@ -109,6 +109,7 @@ namespace App.Api.Controllers
             });
         }
 
+        [AllowAnonymous]
         [HttpPost("{userId}")]
         public async Task<IActionResult> ForgetPassword(string userId)
         {

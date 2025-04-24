@@ -75,7 +75,7 @@ namespace App.Core.Managers
 
                 var currentTime = DateTime.Now;
                 var otpTime = existingOtp.CreatedAt;
-                var otpValidDuration = TimeSpan.FromMinutes(5);
+                var otpValidDuration = TimeSpan.FromMinutes(1);
 
                 if (existingOtp.Code == otp)
                 {
