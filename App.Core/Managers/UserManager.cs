@@ -153,6 +153,21 @@ namespace App.Core.Managers
                 return Result<List<User>>.Failure($"Error retrieving users: {ex.Message}");
             }
         }
+        public async Task<Result<List<User>>> GetStudents()
+        {
+            try
+            {
+                var users = await schoolHubContext.Users.Where(x => x.UserTypeId == 2)
+                    .Include(u => u.UserType)
+                    .ToListAsync();
+
+                return Result<List<User>>.Success(users);
+            }
+            catch (Exception ex)
+            {
+                return Result<List<User>>.Failure($"Error retrieving users: {ex.Message}");
+            }
+        }
 
         public async Task<Result<User>> ForgetPassword(string userId)
         {

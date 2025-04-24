@@ -109,6 +109,21 @@ namespace App.Api.Controllers
             });
         }
 
+        [HttpGet("students")]
+        public async Task<IActionResult> GetStudents()
+        {
+            var usersResult = await userManager.GetStudents();
+            if (!usersResult.IsSuccess)
+            {
+                return StatusCode(500, usersResult.ErrorMessage);
+            }
+            return Ok(new UsersDTO
+            {
+                Users = usersResult.Data.ToList(),
+                Count = usersResult.Data.Count()
+            });
+        }
+
         [AllowAnonymous]
         [HttpPost("{userId}")]
         public async Task<IActionResult> ForgetPassword(string userId)

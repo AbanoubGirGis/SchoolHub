@@ -8,12 +8,11 @@ namespace App.Core.DTOs.GradeDTOs
 {
     public class CreateGradeDTO
     {
-        public int TeacherId { get; set; }
-        public int StudentId { get; set; }
+        public string TeacherId { get; set; }
+        public string StudentId { get; set; }
         public int SubjectId { get; set; }
         public string ExamType { get; set; }
         public decimal Score { get; set; }
         public decimal MaxScore { get; set; }
-        public DateTime CreatedAt { get; set; }
     }
 }

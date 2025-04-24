@@ -54,10 +54,13 @@ namespace App.Core.Managers
         {
             try
             {
+                var users = await schoolHubContext.Users.ToListAsync();
+                var teacherId = users.FirstOrDefault(x => x.UserId == dto.TeacherId)?.Id;
+                var studentId = users.FirstOrDefault(x => x.UserId == dto.StudentId)?.Id;
                 var grade = new Grade
                 {
-                    TeacherId = dto.TeacherId,
-                    StudentId = dto.StudentId,
+                    TeacherId = teacherId,
+                    StudentId = studentId,
                     SubjectId = dto.SubjectId,
                     ExamType = dto.ExamType,
                     Score = dto.Score,
@@ -82,8 +85,12 @@ namespace App.Core.Managers
                 if (grade == null)
                     return Result<Grade>.Failure("Grade not found.");
 
-                grade.TeacherId = dto.TeacherId;
-                grade.StudentId = dto.StudentId;
+                var users = await schoolHubContext.Users.ToListAsync();
+                var teacherId = users.FirstOrDefault(x => x.UserId == dto.TeacherId)?.Id;
+                var studentId = users.FirstOrDefault(x => x.UserId == dto.StudentId)?.Id;
+
+                grade.TeacherId = teacherId;
+                grade.StudentId = studentId;
                 grade.SubjectId = dto.SubjectId;
                 grade.ExamType = dto.ExamType;
                 grade.Score = dto.Score;
