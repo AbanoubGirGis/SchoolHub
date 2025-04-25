@@ -22,7 +22,7 @@ namespace App.Api
             {
                 op.AddPolicy("Default", policy =>
                 {
-                    policy.WithOrigins("https://school-hub-system.vercel.app")
+                    policy.WithOrigins("https://school-hub-system.vercel.app", "http://localhost:3001") 
                           .AllowAnyHeader()
                           .AllowAnyMethod();
                 });

@@ -55,7 +55,7 @@ namespace App.Api.Controllers
         public async Task<IActionResult> CreateWarning([FromBody] WarningDTO warningDTO)
         {
             var warningResult = await warningManager.CreateWarning(warningDTO);
-            if (!warningResult.IsSuccess) 
+            if (!warningResult.IsSuccess)
             {
                 return StatusCode(500, warningResult.ErrorMessage);
             }
@@ -96,12 +96,16 @@ namespace App.Api.Controllers
         [HttpGet("userWarning/{userId}")]
         public async Task<IActionResult> GetUserWarning(string userId)
         {
-            var warningResult = await warningManager.GetUserWarning(userId);
+            var warningResult = await warningManager.GetUserWarnings(userId);
             if (!warningResult.IsSuccess)
             {
                 return NotFound(warningResult.ErrorMessage);
             }
-            return Ok(warningResult.Data);
+            return Ok(new WarningsDTO
+            {
+                Warnings = warningResult.Data.ToList(),
+                Count = warningResult.Data.Count()
+            });
         }
     }
 }

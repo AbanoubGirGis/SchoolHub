@@ -89,7 +89,7 @@ namespace App.Api.Controllers
             }
             return Ok(new
             {
-                message = $" Subject ID {subjectResult.Data.Id} has been successfully updated."
+                message = $" Subject ID {subjectResult.Data.Id} has been successfully deleted."
             });
         }
 

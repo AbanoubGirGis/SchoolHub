@@ -124,5 +124,27 @@ namespace App.Core.Managers
                 return Result<Grade>.Failure($"Error deleting grade: {ex.Message}");
             }
         }
+
+        public async Task<Result<List<Grade>>> GetUserGrades(string userId)
+        {
+            var userGrade = await schoolHubContext.Users.FirstOrDefaultAsync(w => w.UserId == userId);
+            if (userGrade == null)
+            {
+                return Result<List<Grade>>.Failure("User's grade not found");
+            }
+
+            var userGrades = await schoolHubContext.Grades
+                                .Include(w => w.Student)
+                                .Include(s => s.Subject)
+                                .Include(t => t.Teacher)
+                                .Where(w => w.StudentId == userGrade.Id)
+                                .ToListAsync();
+
+            if (userGrades == null)
+            {
+                return Result<List<Grade>>.Failure("User grades not found");
+            }
+            return Result<List<Grade>>.Success(userGrades);
+        }
     }
 }

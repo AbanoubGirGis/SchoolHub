@@ -112,6 +112,12 @@ namespace App.Core.Managers
                 {
                     return Result<Subject>.Failure("Subject not found");
                 }
+                var grade = await schoolHubContext.Grades.FirstOrDefaultAsync(w => w.SubjectId == SubjectId);
+                if (grade != null)
+                {
+                    grade.SubjectId = null;
+                    schoolHubContext.Grades.Update(grade);
+                }
                 schoolHubContext.Subjects.Remove(Subject);
                 await schoolHubContext.SaveChangesAsync();
                 return Result<Subject>.Success(Subject);

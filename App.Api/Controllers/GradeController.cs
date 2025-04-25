@@ -1,4 +1,5 @@
 ﻿using App.Core.DTOs.GradeDTOs;
+using App.Core.DTOs.UsersDTOs;
 using App.Core.Managers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -60,6 +61,21 @@ namespace App.Api.Controllers
             return result.IsSuccess
                 ? Ok(new { message = "Grade deleted successfully", grade = result.Data })
                 : StatusCode(500, result.ErrorMessage);
+        }
+
+        [HttpGet("usergrade/{userId}")]
+        public async Task<IActionResult> GetUsergrade(string userId)
+        {
+            var userGradeResult = await gradeManager.GetUserGrades(userId);
+            if (!userGradeResult.IsSuccess)
+            {
+                return NotFound(userGradeResult.ErrorMessage);
+            }
+            return Ok(new GradesDTO
+            {
+                Grades = userGradeResult.Data.ToList(),
+                Count = userGradeResult.Data.Count()
+            });
         }
     }
 }
