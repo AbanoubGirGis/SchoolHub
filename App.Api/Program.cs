@@ -35,6 +35,7 @@ namespace App.Api
 
 
             builder.Services.AddScoped<UserManager>();
+            builder.Services.AddScoped<ParentStudentManager>();
             builder.Services.AddScoped<OtpManager>();
             builder.Services.AddScoped<ScheduleManager>();
             builder.Services.AddScoped<WarningManager>();
