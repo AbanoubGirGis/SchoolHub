@@ -127,6 +127,14 @@ namespace App.Core.Managers
                 if (user == null)
                     return Result<User>.Failure("User not found");
 
+                var parentStudent = await schoolHubContext.ParentStudents
+                    .FirstOrDefaultAsync(ps => ps.ParentId == user.Id);
+                if (parentStudent != null)
+                {
+                    schoolHubContext.ParentStudents.Remove(parentStudent);
+                    await schoolHubContext.SaveChangesAsync();
+                }
+
                 var subject = await schoolHubContext.Subjects.FirstOrDefaultAsync(u => u.TeacherId == user.Id);
                 if (subject != null)
                 {
