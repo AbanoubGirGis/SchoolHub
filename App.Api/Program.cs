@@ -22,7 +22,7 @@ namespace App.Api
             {
                 op.AddPolicy("Default", policy =>
                 {
-                    policy.WithOrigins("https://school-hub-system.vercel.app", "http://localhost:3000", "https://school-system-lilac.vercel.app") 
+                    policy.WithOrigins("https://school-hub-system.vercel.app", "http://localhost:3000", "https://school-system-lilac.vercel.app")
                           .AllowAnyHeader()
                           .AllowAnyMethod();
                 });
@@ -109,11 +109,11 @@ namespace App.Api
 
             var app = builder.Build();
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            //if (app.Environment.IsDevelopment())
+            //{
+            app.UseSwagger();
+            app.UseSwaggerUI();
+            //}
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
